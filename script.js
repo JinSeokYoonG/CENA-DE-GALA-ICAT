@@ -168,211 +168,153 @@ setTimeout(() => {
 
 // --- LÓGICA DEL GENERADOR DE BRAZALETE (VERSIÓN 2.0 - MUCHO MEJORADA) ---
 const braceletCanvas = document.getElementById("braceletCanvas");
-const braceletInput = document.getElementById("braceletName");
+const ctx = braceletCanvas.getContext("2d");
 const generateBtn = document.getElementById("generateBracelet");
 const downloadBtn = document.getElementById("downloadBracelet");
 
-if (braceletCanvas && braceletInput && generateBtn && downloadBtn) {
-  const ctx = braceletCanvas.getContext("2d");
-  const neonGreen = "#39FF14";
-  const darkBg = "#111111"; // Un negro un poco menos puro para contraste
-  const textWhite = "#FFFFFF";
-  const lightGrey = "#AAAAAA"; // Para subtítulos o texto secundario
+generateBtn.addEventListener("click", () => {
+  const name = document.getElementById("braceletName").value.trim();
+  if (!name) {
+    alert("Por favor, ingresa tu nombre completo.");
+    return;
+  }
+  drawBracelet(name);
+});
 
-  // Función de ayuda para dibujar el código de barras decorativo
-  function drawBarcode(x, y, width, height) {
-    ctx.fillStyle = textWhite; // Barras blancas sobre fondo oscuro
-    let currentX = x;
-    while (currentX < x + width) {
-      const lineWidth = Math.random() * 4 + 1;
-      ctx.fillRect(currentX, y, lineWidth, height);
-      currentX += lineWidth + Math.random() * 3 + 2;
-    }
+downloadBtn.addEventListener("click", () => {
+  const link = document.createElement("a");
+  link.download = "brazalete_gala.png";
+  link.href = braceletCanvas.toDataURL("image/png");
+  link.click();
+});
+
+function drawBracelet(name) {
+  const w = braceletCanvas.width;
+  const h = braceletCanvas.height;
+  const padding = 15;
+  const innerW = w - padding * 2;
+  const innerH = h - padding * 2;
+  const cornerRadius = 80;
+
+  ctx.clearRect(0, 0, w, h);
+
+  // Fondo base
+  ctx.fillStyle = "#0c0c0c";
+  ctx.beginPath();
+  ctx.roundRect(padding, padding, innerW, innerH, cornerRadius);
+  ctx.fill();
+
+  ctx.save();
+  ctx.clip();
+
+  // Secciones
+  const section1Width = 260;
+  const section3Width = 220;
+  const section2StartX = padding + section1Width;
+  const section2Width = innerW - section1Width - section3Width;
+
+  const neon = "#00ff66";
+  const greenGradient = ctx.createLinearGradient(0, 0, 0, h);
+  greenGradient.addColorStop(0, "#00cc44");
+  greenGradient.addColorStop(0.5, neon);
+  greenGradient.addColorStop(1, "#00cc44");
+
+  // Sección 1
+  ctx.fillStyle = greenGradient;
+  ctx.fillRect(padding, padding, section1Width, innerH);
+
+  // Sección 3
+  ctx.fillStyle = greenGradient;
+  ctx.fillRect(w - section3Width - padding, padding, section3Width, innerH);
+
+  // Sección central
+  ctx.fillStyle = "#000";
+  ctx.fillRect(section2StartX, padding, section2Width, innerH);
+
+  // --- IZQUIERDA ---
+  ctx.fillStyle = "#000";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+
+  ctx.font = "bold 22px 'Inter', sans-serif";
+  ctx.fillText("Mano Derecha", padding + section1Width / 2, h / 2 - 90);
+
+  ctx.font = "40px 'Inter', sans-serif";
+  ctx.fillText("✋", padding + section1Width / 2, h / 2 - 45);
+
+  ctx.font = "bold 38px 'Inter', sans-serif";
+  ctx.fillText("GALA", padding + section1Width / 2, h / 2 + 5);
+  ctx.fillText("ICAT", padding + section1Width / 2, h / 2 + 50);
+  ctx.font = "bold 30px 'Inter', sans-serif";
+  ctx.fillText("2025", padding + section1Width / 2, h / 2 + 95);
+  ctx.font = "bold 22px 'Inter', sans-serif";
+  ctx.fillText("Inter", padding + section1Width / 2, h / 2 + 125);
+
+  // --- CENTRO ---
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#aaa";
+  ctx.font = "20px 'Inter', sans-serif";
+  ctx.fillText("Presenta tu:", w / 2, h / 2 - 70);
+
+  ctx.fillStyle = neon;
+  ctx.shadowColor = neon;
+  ctx.shadowBlur = 25;
+  let fontSize = 80;
+  const maxNameWidth = section2Width - 40;
+  let textWidth;
+  do {
+    fontSize--;
+    ctx.font = `bold ${fontSize}px 'Inter', sans-serif`;
+    textWidth = ctx.measureText(name.toUpperCase()).width;
+  } while (textWidth > maxNameWidth && fontSize > 20);
+  ctx.fillText(name.toUpperCase(), w / 2, h / 2 + 10);
+  ctx.shadowBlur = 0;
+
+  ctx.fillStyle = "#fff";
+  ctx.font = "24px 'Inter', sans-serif";
+  ctx.fillText("DISCO PARTY", w / 2, h / 2 + 60);
+
+  ctx.fillStyle = "#aaa";
+  ctx.font = "13px 'Inter', sans-serif";
+  ctx.fillText("Este brazalete es tu pase de acceso.", w / 2, h - 55);
+  ctx.fillText("Preséntalo digitalmente o impreso. Sin brazalete, no hay entrada.", w / 2, h - 35);
+
+  // --- DERECHA ---
+  ctx.fillStyle = "#000";
+  ctx.textAlign = "center";
+  ctx.font = "bold 34px 'Inter', sans-serif";
+  ctx.fillText("ALL ACCESS", w - section3Width / 2 - padding, h / 2 - 60);
+
+  ctx.font = "normal 22px 'Inter', sans-serif";
+  ctx.fillText("15 NOV 2025", w - section3Width / 2 - padding, h / 2 - 20);
+
+  // Código de barras
+  const barcodeX = w - section3Width / 2 - padding - 80;
+  const barcodeY = h / 2 + 30;
+  const barcodeW = 160;
+  const barcodeH = 55;
+  ctx.fillStyle = "#000";
+  ctx.fillRect(barcodeX - 5, barcodeY - 5, barcodeW + 10, barcodeH + 10);
+
+  // Barras blancas
+  ctx.fillStyle = "#fff";
+  let currentX = barcodeX;
+  while (currentX < barcodeX + barcodeW) {
+    const lineWidth = Math.random() * 4 + 1;
+    ctx.fillRect(currentX, barcodeY, lineWidth, barcodeH);
+    currentX += lineWidth + Math.random() * 3 + 2;
   }
 
-  // Función para dibujar un ícono de mano derecha simplificado
-  function drawRightHandIcon(x, y, size, color) {
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    // Pulgar
-    ctx.arc(x + size * 0.1, y + size * 0.4, size * 0.15, 0, Math.PI * 2);
-    // Base de la palma
-    ctx.arc(x + size * 0.3, y + size * 0.6, size * 0.25, 0, Math.PI * 2);
-    // Dedos (simplificados)
-    ctx.roundRect(x + size * 0.2, y + size * 0.1, size * 0.15, size * 0.4, size * 0.07);
-    ctx.roundRect(x + size * 0.35, y + size * 0.05, size * 0.15, size * 0.45, size * 0.07);
-    ctx.roundRect(x + size * 0.5, y + size * 0.1, size * 0.15, size * 0.4, size * 0.07);
-    ctx.fill();
-  }
+  // Borde luminoso
+  ctx.restore();
+  ctx.strokeStyle = neon;
+  ctx.lineWidth = 4;
+  ctx.shadowColor = neon;
+  ctx.shadowBlur = 30;
+  ctx.beginPath();
+  ctx.roundRect(padding, padding, innerW, innerH, cornerRadius);
+  ctx.stroke();
+  ctx.shadowBlur = 0;
 
-
-  // Función principal para dibujar el brazalete
-  function drawBracelet(name) {
-    const w = braceletCanvas.width; // 800
-    const h = braceletCanvas.height; // 300
-    const padding = 15;
-    const innerW = w - padding * 2;
-    const innerH = h - padding * 2;
-    const cornerRadius = 25; // Bordes un poco más suaves
-
-    // --- 1. Preparar el Lienzo ---
-    ctx.clearRect(0, 0, w, h);
-
-    // Fondo oscuro que será la base del brazalete
-    ctx.fillStyle = darkBg;
-    ctx.beginPath();
-    ctx.roundRect(padding, padding, innerW, innerH, cornerRadius);
-    ctx.fill();
-
-    // Guardar el estado para clipping
-    ctx.save();
-    ctx.clip(); // Todo lo que se dibuje ahora estará dentro de la forma redondeada
-
-    // --- 2. Dibujar las Secciones ---
-    const section1Width = 240; // Izquierda - GALA ICAT
-    const section3Width = 200; // Derecha - ALL ACCESS
-
-    // Sección central (nombre) - Es simplemente el espacio que queda
-    const section2StartX = padding + section1Width;
-    const section2Width = innerW - section1Width - section3Width;
-
-    // Gradiente para las secciones verdes
-    const greenGradient = ctx.createLinearGradient(0, 0, 0, h);
-    greenGradient.addColorStop(0, "#2ecc40"); // Verde más oscuro
-    greenGradient.addColorStop(0.5, neonGreen); // Verde neón brillante
-    greenGradient.addColorStop(1, "#2ecc40"); // Verde más oscuro
-
-    // Sección 1: Izquierda (Verde)
-    ctx.fillStyle = greenGradient;
-    ctx.fillRect(padding, padding, section1Width, innerH);
-
-    // Sección 3: Derecha (Verde)
-    ctx.fillStyle = greenGradient;
-    ctx.fillRect(w - section3Width - padding, padding, section3Width, innerH);
-
-    // --- 3. Añadir Texto y Gráficos ---
-
-    // Texto Sección 1 (Izquierda)
-    ctx.fillStyle = darkBg; // Texto oscuro sobre el verde
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.font = "bold 55px 'Playfair Display', serif";
-    ctx.fillText("GALA", padding + section1Width / 2, h / 2 - 50);
-    ctx.fillText("ICAT", padding + section1Width / 2, h / 2 + 10);
-    ctx.font = "bold 30px 'Inter', sans-serif";
-    ctx.fillText("2025", padding + section1Width / 2, h / 2 + 65);
-
-    // Ícono y Texto "Mano Derecha"
-    drawRightHandIcon(padding + section1Width / 2 - 25, padding + 30, 50, darkBg);
-    ctx.font = "bold 16px 'Inter', sans-serif";
-    ctx.fillText("Mano Derecha", padding + section1Width / 2, padding + 100);
-
-
-    // Texto Sección 2 (Centro - Nombre y Evento)
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-
-    // Subtítulo del evento
-    ctx.fillStyle = lightGrey;
-    ctx.font = "normal 20px 'Inter', sans-serif";
-    ctx.fillText("Presenta tu:", w / 2, h / 2 - 85); // Pequeño texto antes del nombre
-
-    // Nombre (con glow neón)
-    ctx.fillStyle = neonGreen;
-    ctx.shadowColor = neonGreen;
-    ctx.shadowBlur = 25; // Más glow
-    let fontSize = 52;
-    const maxNameWidth = section2Width - 40; // Ancho máximo del nombre
-    let textWidth;
-    do {
-      fontSize--;
-      ctx.font = `bold ${fontSize}px 'Inter', sans-serif`;
-      textWidth = ctx.measureText(name.toUpperCase()).width;
-    } while (textWidth > maxNameWidth && fontSize > 20);
-
-    ctx.fillText(name.toUpperCase(), w / 2, h / 2 - 20);
-    ctx.shadowBlur = 0; // Resetear sombra para el siguiente texto
-
-    // Subtítulo "DISCO PARTY"
-    ctx.fillStyle = textWhite;
-    ctx.font = "normal 22px 'Inter', sans-serif";
-    ctx.fillText("DISCO PARTY", w / 2, h / 2 + 30);
-
-    // --- Información adicional (texto inferior central) ---
-    ctx.fillStyle = lightGrey;
-    ctx.font = "14px 'Inter', sans-serif";
-    ctx.fillText("Este brazalete es tu pase de acceso.", w / 2, h - padding - 40);
-    ctx.fillText("Preséntalo digitalmente o impreso. Sin brazalete, no hay entrada.", w / 2, h - padding - 20);
-
-
-    // Texto Sección 3 (Derecha)
-    ctx.fillStyle = darkBg; // Texto oscuro sobre el verde
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.font = "bold 34px 'Inter', sans-serif";
-    ctx.fillText("ALL ACCESS", w - section3Width / 2 - padding, h / 2 - 70);
-
-    ctx.font = "normal 22px 'Inter', sans-serif";
-    ctx.fillText("15 NOV 2025", w - section3Width / 2 - padding, h / 2 - 20);
-
-    // Gráfico de Código de Barras (ahora blanco sobre verde)
-    ctx.fillStyle = darkBg; // Las barras serán oscuras
-    const barcodeX = w - section3Width / 2 - padding - 80;
-    const barcodeY = h / 2 + 30;
-    const barcodeW = 160;
-    const barcodeH = 50;
-    // Dibuja el fondo de las barras primero
-    ctx.fillRect(barcodeX - 5, barcodeY - 5, barcodeW + 10, barcodeH + 10);
-    // Ahora dibuja las barras
-    drawBarcode(barcodeX, barcodeY, barcodeW, barcodeH);
-
-
-    // --- 4. Añadir Borde Exterior de Glow ---
-    ctx.restore(); // Restaurar el canvas para quitar el clip
-
-    ctx.strokeStyle = neonGreen;
-    ctx.lineWidth = 4;
-    ctx.shadowColor = neonGreen;
-    ctx.shadowBlur = 20;
-    ctx.beginPath();
-    ctx.roundRect(padding, padding, innerW, innerH, cornerRadius);
-    ctx.stroke();
-
-    ctx.shadowBlur = 0; // Resetear sombra
-
-    // Mostrar botón de descarga
-    downloadBtn.style.display = "block";
-  }
-
-  // --- Lógica de Eventos (Sin Cambios) ---
-
-  generateBtn.addEventListener("click", () => {
-    const name = braceletInput.value.trim();
-    if (name) {
-      drawBracelet(name);
-    } else {
-      alert("Por favor, ingresa tu nombre completo");
-    }
-  });
-
-  braceletInput.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      const name = braceletInput.value.trim();
-      if (name) {
-        drawBracelet(name);
-      }
-    }
-  });
-
-  downloadBtn.addEventListener("click", () => {
-    const link = document.createElement("a");
-    const nameSlug = braceletInput.value
-      .trim()
-      .replace(/\s+/g, "-")
-      .toLowerCase();
-    link.download = `brazalete-gala-icat-2025-${nameSlug}.png`;
-    link.href = braceletCanvas.toDataURL("image/png");
-    link.click();
-  });
+  downloadBtn.style.display = "block";
 }
