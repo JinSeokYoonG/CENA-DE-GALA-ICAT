@@ -175,7 +175,6 @@ const downloadBtn = document.getElementById("downloadBracelet")
 if (braceletCanvas && braceletInput && generateBtn && downloadBtn) {
   const ctx = braceletCanvas.getContext("2d")
 
-  // Function to draw the bracelet
   async function drawBracelet(name) {
     // Clear canvas
     ctx.clearRect(0, 0, braceletCanvas.width, braceletCanvas.height)
@@ -184,13 +183,13 @@ if (braceletCanvas && braceletInput && generateBtn && downloadBtn) {
     ctx.fillStyle = "#000000"
     ctx.fillRect(0, 0, braceletCanvas.width, braceletCanvas.height)
 
-    // Main wristband dimensions
-    const bandWidth = 1100
-    const bandHeight = 300
+    // Main wristband dimensions - wider horizontal format
+    const bandWidth = 1300
+    const bandHeight = 280
     const bandX = (braceletCanvas.width - bandWidth) / 2
     const bandY = (braceletCanvas.height - bandHeight) / 2
 
-    // Draw main band background with neon green
+    // Draw main band background with neon green gradient
     const gradient = ctx.createLinearGradient(bandX, bandY, bandX, bandY + bandHeight)
     gradient.addColorStop(0, "#2ecc40")
     gradient.addColorStop(0.5, "#39FF14")
@@ -204,150 +203,147 @@ if (braceletCanvas && braceletInput && generateBtn && downloadBtn) {
 
     // Draw perforated tear-off line on the left side
     ctx.strokeStyle = "#000000"
-    ctx.lineWidth = 2
-    ctx.setLineDash([8, 8])
+    ctx.lineWidth = 3
+    ctx.setLineDash([10, 10])
     ctx.beginPath()
-    ctx.moveTo(bandX + 280, bandY + 20)
-    ctx.lineTo(bandX + 280, bandY + bandHeight - 20)
+    ctx.moveTo(bandX + 220, bandY + 15)
+    ctx.lineTo(bandX + 220, bandY + bandHeight - 15)
     ctx.stroke()
     ctx.setLineDash([])
 
-    // Left section (tear-off stub) - darker green
-    ctx.fillStyle = "rgba(0, 0, 0, 0.15)"
-    ctx.fillRect(bandX, bandY, 280, bandHeight)
+    // Left section (tear-off stub) - darker with pattern
+    ctx.fillStyle = "rgba(0, 0, 0, 0.2)"
+    ctx.fillRect(bandX, bandY, 220, bandHeight)
+
+    // Security pattern in stub
+    ctx.fillStyle = "rgba(0, 0, 0, 0.1)"
+    for (let i = 0; i < 15; i++) {
+      for (let j = 0; j < 8; j++) {
+        ctx.fillRect(bandX + 10 + i * 14, bandY + 10 + j * 35, 8, 25)
+      }
+    }
 
     // Draw decorative borders
     ctx.strokeStyle = "#000000"
-    ctx.lineWidth = 4
-    ctx.strokeRect(bandX + 5, bandY + 5, bandWidth - 10, bandHeight - 10)
+    ctx.lineWidth = 6
+    ctx.strokeRect(bandX + 3, bandY + 3, bandWidth - 6, bandHeight - 6)
 
     // Inner decorative line
     ctx.lineWidth = 2
-    ctx.strokeRect(bandX + 15, bandY + 15, bandWidth - 30, bandHeight - 30)
-
-    // Generate QR code URL with event info and name
-    const qrData = encodeURIComponent(`GALA ICAT 2025 - ${name} - 15 NOV 2025 - ENTRADA VERIFICADA`)
-    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${qrData}&bgcolor=39FF14&color=000000`
-
-    // Load and draw QR code
-    const qrImage = new Image()
-    qrImage.crossOrigin = "anonymous"
-    qrImage.src = qrCodeUrl
-
-    await new Promise((resolve) => {
-      qrImage.onload = () => {
-        // Draw QR code in the left section
-        const qrSize = 180
-        const qrX = bandX + 50
-        const qrY = bandY + (bandHeight - qrSize) / 2
-
-        // White background for QR
-        ctx.fillStyle = "#39FF14"
-        ctx.fillRect(qrX - 10, qrY - 10, qrSize + 20, qrSize + 20)
-
-        ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize)
-
-        // QR label
-        ctx.fillStyle = "#000000"
-        ctx.font = "bold 14px 'Inter', sans-serif"
-        ctx.textAlign = "center"
-        ctx.fillText("ESCANEAR", qrX + qrSize / 2, qrY + qrSize + 30)
-        ctx.fillText("PARA VERIFICAR", qrX + qrSize / 2, qrY + qrSize + 48)
-
-        resolve()
-      }
-      qrImage.onerror = () => {
-        console.error("Error loading QR code")
-        resolve()
-      }
-    })
+    ctx.strokeRect(bandX + 12, bandY + 12, bandWidth - 24, bandHeight - 24)
 
     // Right section - Main content area
-    const contentX = bandX + 320
-    const contentWidth = bandWidth - 340
+    const contentX = bandX + 240
+    const contentWidth = bandWidth - 260
 
-    // Event logo/title at top
+    // Event title at top - bold and prominent
     ctx.fillStyle = "#000000"
-    ctx.font = "bold 48px 'Playfair Display', serif"
+    ctx.font = "bold 56px 'Playfair Display', serif"
+    ctx.textAlign = "left"
+    ctx.shadowColor = "rgba(0, 0, 0, 0.3)"
+    ctx.shadowBlur = 5
+    ctx.fillText("GALA SMART TECH", contentX + 20, bandY + 65)
+    ctx.shadowBlur = 0
+
+    // Year badge
+    ctx.fillStyle = "#000000"
+    ctx.fillRect(contentX + contentWidth - 120, bandY + 25, 100, 50)
+    ctx.fillStyle = "#39FF14"
+    ctx.font = "bold 32px 'Inter', sans-serif"
     ctx.textAlign = "center"
-    ctx.shadowColor = "rgba(0, 0, 0, 0.5)"
+    ctx.fillText("2025", contentX + contentWidth - 70, bandY + 60)
+
+    // Decorative line under title
+    ctx.strokeStyle = "#000000"
+    ctx.lineWidth = 4
+    ctx.beginPath()
+    ctx.moveTo(contentX + 20, bandY + 85)
+    ctx.lineTo(contentX + contentWidth - 140, bandY + 85)
+    ctx.stroke()
+
+    // Guest name - large and centered
+    ctx.font = "bold 48px 'Inter', sans-serif"
+    ctx.fillStyle = "#000000"
+    ctx.textAlign = "left"
+    ctx.shadowColor = "rgba(255, 255, 255, 0.4)"
     ctx.shadowBlur = 8
-    ctx.fillText("GALA ICAT", contentX + contentWidth / 2, bandY + 70)
-    ctx.shadowBlur = 0
-
-    // Year
-    ctx.font = "bold 36px 'Inter', sans-serif"
-    ctx.fillText("2025", contentX + contentWidth / 2, bandY + 110)
-
-    // Decorative line
-    ctx.strokeStyle = "#000000"
-    ctx.lineWidth = 3
-    ctx.beginPath()
-    ctx.moveTo(contentX + 100, bandY + 130)
-    ctx.lineTo(contentX + contentWidth - 100, bandY + 130)
-    ctx.stroke()
-
-    // Guest name - centered and prominent
-    ctx.font = "bold 42px 'Inter', sans-serif"
-    ctx.fillStyle = "#000000"
-    ctx.shadowColor = "rgba(255, 255, 255, 0.3)"
-    ctx.shadowBlur = 10
     const nameText = name.toUpperCase()
-    ctx.fillText(nameText, contentX + contentWidth / 2, bandY + 185)
+    ctx.fillText(nameText, contentX + 20, bandY + 145)
     ctx.shadowBlur = 0
 
-    // Decorative line
-    ctx.strokeStyle = "#000000"
-    ctx.lineWidth = 3
-    ctx.beginPath()
-    ctx.moveTo(contentX + 100, bandY + 205)
-    ctx.lineTo(contentX + contentWidth - 100, bandY + 205)
-    ctx.stroke()
-
-    // Date and location
-    ctx.font = "bold 24px 'Inter', sans-serif"
+    // Event details
+    ctx.font = "bold 22px 'Inter', sans-serif"
     ctx.fillStyle = "#000000"
-    ctx.fillText("15 NOVIEMBRE 2025", contentX + contentWidth / 2, bandY + 240)
+    ctx.textAlign = "left"
+    ctx.fillText("15 NOVIEMBRE 2025 · 5:00 PM", contentX + 20, bandY + 185)
 
     ctx.font = "20px 'Inter', sans-serif"
-    ctx.fillText("CLUB SOCIAL · COATEPEQUE", contentX + contentWidth / 2, bandY + 268)
+    ctx.fillText("CLUB SOCIAL · COATEPEQUE", contentX + 20, bandY + 215)
 
-    // Add security pattern in corners
-    ctx.fillStyle = "rgba(0, 0, 0, 0.1)"
-    for (let i = 0; i < 5; i++) {
-      ctx.beginPath()
-      ctx.arc(bandX + bandWidth - 40, bandY + 40, 3 + i * 3, 0, Math.PI * 2)
-      ctx.fill()
+    // VIP badge
+    ctx.fillStyle = "#000000"
+    ctx.fillRect(contentX + 20, bandY + 230, 80, 35)
+    ctx.fillStyle = "#39FF14"
+    ctx.font = "bold 20px 'Inter', sans-serif"
+    ctx.textAlign = "center"
+    ctx.fillText("VIP", contentX + 60, bandY + 253)
 
+    // Generate barcode based on name
+    const barcodeX = contentX + contentWidth - 280
+    const barcodeY = bandY + 110
+    const barcodeWidth = 260
+    const barcodeHeight = 120
+
+    // Barcode background
+    ctx.fillStyle = "#FFFFFF"
+    ctx.fillRect(barcodeX - 10, barcodeY - 10, barcodeWidth + 20, barcodeHeight + 40)
+
+    // Generate barcode pattern from name
+    ctx.fillStyle = "#000000"
+    const nameHash = name.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0)
+    const barCount = 40
+    const barWidth = barcodeWidth / barCount
+
+    for (let i = 0; i < barCount; i++) {
+      const seed = (nameHash * (i + 1)) % 7
+      const height = barcodeHeight * (0.6 + seed / 20)
+      const yOffset = (barcodeHeight - height) / 2
+
+      if ((nameHash + i) % 3 !== 0) {
+        ctx.fillRect(barcodeX + i * barWidth, barcodeY + yOffset, barWidth * 0.7, height)
+      }
+    }
+
+    // Barcode number below
+    ctx.fillStyle = "#000000"
+    ctx.font = "bold 16px 'Courier New', monospace"
+    ctx.textAlign = "center"
+    const barcodeNumber = String(nameHash).padStart(12, "0").slice(0, 12)
+    ctx.fillText(barcodeNumber, barcodeX + barcodeWidth / 2, barcodeY + barcodeHeight + 25)
+
+    // Add decorative elements
+    ctx.fillStyle = "rgba(0, 0, 0, 0.15)"
+    for (let i = 0; i < 3; i++) {
       ctx.beginPath()
-      ctx.arc(bandX + bandWidth - 40, bandY + bandHeight - 40, 3 + i * 3, 0, Math.PI * 2)
+      ctx.arc(contentX + 140 + i * 25, bandY + 240, 8, 0, Math.PI * 2)
       ctx.fill()
     }
 
-    // Add "VIP ACCESS" watermark
-    ctx.save()
-    ctx.globalAlpha = 0.15
-    ctx.font = "bold 60px 'Inter', sans-serif"
-    ctx.fillStyle = "#000000"
-    ctx.textAlign = "center"
-    ctx.fillText("VIP ACCESS", contentX + contentWidth / 2, bandY + bandHeight / 2 + 20)
-    ctx.restore()
-
     // Add holographic effect lines
-    ctx.strokeStyle = "rgba(0, 0, 0, 0.1)"
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.08)"
     ctx.lineWidth = 1
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 12; i++) {
       ctx.beginPath()
-      ctx.moveTo(contentX, bandY + i * 15)
-      ctx.lineTo(contentX + contentWidth, bandY + i * 15 + 30)
+      ctx.moveTo(contentX, bandY + 30 + i * 22)
+      ctx.lineTo(contentX + 200, bandY + 50 + i * 22)
       ctx.stroke()
     }
 
     // Add neon glow effect around entire wristband
     ctx.strokeStyle = "#39FF14"
-    ctx.lineWidth = 3
+    ctx.lineWidth = 4
     ctx.shadowColor = "#39FF14"
-    ctx.shadowBlur = 30
+    ctx.shadowBlur = 35
     ctx.strokeRect(bandX, bandY, bandWidth, bandHeight)
     ctx.shadowBlur = 0
 
@@ -361,7 +357,7 @@ if (braceletCanvas && braceletInput && generateBtn && downloadBtn) {
     if (name) {
       drawBracelet(name)
     } else {
-      alert("Por favor, ingresa tu nombre completo")
+      alert("Por favor, ingresa tu nombre")
     }
   })
 
