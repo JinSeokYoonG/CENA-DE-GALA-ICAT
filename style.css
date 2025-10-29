@@ -696,7 +696,7 @@ body {
   gap: 1.5rem;
 }
 
-/* Updated canvas styling for better presentation */
+/* Updated canvas styling for horizontal wristband format */
 #braceletCanvas {
   max-width: 100%;
   height: auto;
