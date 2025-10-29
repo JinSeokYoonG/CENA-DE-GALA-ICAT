@@ -184,7 +184,7 @@ if (braceletCanvas && braceletInput && generateBtn && downloadBtn) {
     ctx.fillRect(0, 0, braceletCanvas.width, braceletCanvas.height)
 
     // Main wristband dimensions - wider horizontal format
-    const bandWidth = 1300
+    const bandWidth = 1500
     const bandHeight = 280
     const bandX = (braceletCanvas.width - bandWidth) / 2
     const bandY = (braceletCanvas.height - bandHeight) / 2
@@ -289,9 +289,9 @@ if (braceletCanvas && braceletInput && generateBtn && downloadBtn) {
     ctx.fillText("VIP", contentX + 60, bandY + 253)
 
     // Generate barcode based on name
-    const barcodeX = contentX + contentWidth - 280
+    const barcodeX = contentX + contentWidth - 300
     const barcodeY = bandY + 110
-    const barcodeWidth = 260
+    const barcodeWidth = 280
     const barcodeHeight = 120
 
     // Barcode background
