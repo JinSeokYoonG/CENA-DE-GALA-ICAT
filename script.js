@@ -242,7 +242,7 @@ if (braceletCanvas && braceletInput && generateBtn && downloadBtn) {
     ctx.textAlign = "left"
     ctx.shadowColor = "rgba(0, 0, 0, 0.3)"
     ctx.shadowBlur = 5
-    ctx.fillText("GALA SMART TECH", contentX + 20, bandY + 65)
+    ctx.fillText("ICAT | CENA DE GALA Y DISCO PARTY", contentX + 20, bandY + 65)
     ctx.shadowBlur = 0
 
     // Year badge
