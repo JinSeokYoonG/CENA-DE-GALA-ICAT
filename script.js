@@ -166,155 +166,220 @@ setTimeout(() => {
   })
 }, 100)
 
-// --- LÓGICA DEL GENERADOR DE BRAZALETE (VERSIÓN 2.0 - MUCHO MEJORADA) ---
-const braceletCanvas = document.getElementById("braceletCanvas");
-const ctx = braceletCanvas.getContext("2d");
-const generateBtn = document.getElementById("generateBracelet");
-const downloadBtn = document.getElementById("downloadBracelet");
+// --- LÓGICA DEL GENERADOR DE BRAZALETE ---
+const braceletCanvas = document.getElementById("braceletCanvas")
+const braceletInput = document.getElementById("braceletName")
+const generateBtn = document.getElementById("generateBracelet")
+const downloadBtn = document.getElementById("downloadBracelet")
 
-generateBtn.addEventListener("click", () => {
-  const name = document.getElementById("braceletName").value.trim();
-  if (!name) {
-    alert("Por favor, ingresa tu nombre completo.");
-    return;
+if (braceletCanvas && braceletInput && generateBtn && downloadBtn) {
+  const ctx = braceletCanvas.getContext("2d")
+
+  // Function to draw the bracelet
+  async function drawBracelet(name) {
+    // Clear canvas
+    ctx.clearRect(0, 0, braceletCanvas.width, braceletCanvas.height)
+
+    // Background - Black
+    ctx.fillStyle = "#000000"
+    ctx.fillRect(0, 0, braceletCanvas.width, braceletCanvas.height)
+
+    // Main wristband dimensions
+    const bandWidth = 1100
+    const bandHeight = 300
+    const bandX = (braceletCanvas.width - bandWidth) / 2
+    const bandY = (braceletCanvas.height - bandHeight) / 2
+
+    // Draw main band background with neon green
+    const gradient = ctx.createLinearGradient(bandX, bandY, bandX, bandY + bandHeight)
+    gradient.addColorStop(0, "#2ecc40")
+    gradient.addColorStop(0.5, "#39FF14")
+    gradient.addColorStop(1, "#2ecc40")
+
+    ctx.fillStyle = gradient
+    ctx.shadowColor = "#39FF14"
+    ctx.shadowBlur = 40
+    ctx.fillRect(bandX, bandY, bandWidth, bandHeight)
+    ctx.shadowBlur = 0
+
+    // Draw perforated tear-off line on the left side
+    ctx.strokeStyle = "#000000"
+    ctx.lineWidth = 2
+    ctx.setLineDash([8, 8])
+    ctx.beginPath()
+    ctx.moveTo(bandX + 280, bandY + 20)
+    ctx.lineTo(bandX + 280, bandY + bandHeight - 20)
+    ctx.stroke()
+    ctx.setLineDash([])
+
+    // Left section (tear-off stub) - darker green
+    ctx.fillStyle = "rgba(0, 0, 0, 0.15)"
+    ctx.fillRect(bandX, bandY, 280, bandHeight)
+
+    // Draw decorative borders
+    ctx.strokeStyle = "#000000"
+    ctx.lineWidth = 4
+    ctx.strokeRect(bandX + 5, bandY + 5, bandWidth - 10, bandHeight - 10)
+
+    // Inner decorative line
+    ctx.lineWidth = 2
+    ctx.strokeRect(bandX + 15, bandY + 15, bandWidth - 30, bandHeight - 30)
+
+    // Generate QR code URL with event info and name
+    const qrData = encodeURIComponent(`GALA ICAT 2025 - ${name} - 15 NOV 2025 - ENTRADA VERIFICADA`)
+    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${qrData}&bgcolor=39FF14&color=000000`
+
+    // Load and draw QR code
+    const qrImage = new Image()
+    qrImage.crossOrigin = "anonymous"
+    qrImage.src = qrCodeUrl
+
+    await new Promise((resolve) => {
+      qrImage.onload = () => {
+        // Draw QR code in the left section
+        const qrSize = 180
+        const qrX = bandX + 50
+        const qrY = bandY + (bandHeight - qrSize) / 2
+
+        // White background for QR
+        ctx.fillStyle = "#39FF14"
+        ctx.fillRect(qrX - 10, qrY - 10, qrSize + 20, qrSize + 20)
+
+        ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize)
+
+        // QR label
+        ctx.fillStyle = "#000000"
+        ctx.font = "bold 14px 'Inter', sans-serif"
+        ctx.textAlign = "center"
+        ctx.fillText("ESCANEAR", qrX + qrSize / 2, qrY + qrSize + 30)
+        ctx.fillText("PARA VERIFICAR", qrX + qrSize / 2, qrY + qrSize + 48)
+
+        resolve()
+      }
+      qrImage.onerror = () => {
+        console.error("Error loading QR code")
+        resolve()
+      }
+    })
+
+    // Right section - Main content area
+    const contentX = bandX + 320
+    const contentWidth = bandWidth - 340
+
+    // Event logo/title at top
+    ctx.fillStyle = "#000000"
+    ctx.font = "bold 48px 'Playfair Display', serif"
+    ctx.textAlign = "center"
+    ctx.shadowColor = "rgba(0, 0, 0, 0.5)"
+    ctx.shadowBlur = 8
+    ctx.fillText("GALA ICAT", contentX + contentWidth / 2, bandY + 70)
+    ctx.shadowBlur = 0
+
+    // Year
+    ctx.font = "bold 36px 'Inter', sans-serif"
+    ctx.fillText("2025", contentX + contentWidth / 2, bandY + 110)
+
+    // Decorative line
+    ctx.strokeStyle = "#000000"
+    ctx.lineWidth = 3
+    ctx.beginPath()
+    ctx.moveTo(contentX + 100, bandY + 130)
+    ctx.lineTo(contentX + contentWidth - 100, bandY + 130)
+    ctx.stroke()
+
+    // Guest name - centered and prominent
+    ctx.font = "bold 42px 'Inter', sans-serif"
+    ctx.fillStyle = "#000000"
+    ctx.shadowColor = "rgba(255, 255, 255, 0.3)"
+    ctx.shadowBlur = 10
+    const nameText = name.toUpperCase()
+    ctx.fillText(nameText, contentX + contentWidth / 2, bandY + 185)
+    ctx.shadowBlur = 0
+
+    // Decorative line
+    ctx.strokeStyle = "#000000"
+    ctx.lineWidth = 3
+    ctx.beginPath()
+    ctx.moveTo(contentX + 100, bandY + 205)
+    ctx.lineTo(contentX + contentWidth - 100, bandY + 205)
+    ctx.stroke()
+
+    // Date and location
+    ctx.font = "bold 24px 'Inter', sans-serif"
+    ctx.fillStyle = "#000000"
+    ctx.fillText("15 NOVIEMBRE 2025", contentX + contentWidth / 2, bandY + 240)
+
+    ctx.font = "20px 'Inter', sans-serif"
+    ctx.fillText("CLUB SOCIAL · COATEPEQUE", contentX + contentWidth / 2, bandY + 268)
+
+    // Add security pattern in corners
+    ctx.fillStyle = "rgba(0, 0, 0, 0.1)"
+    for (let i = 0; i < 5; i++) {
+      ctx.beginPath()
+      ctx.arc(bandX + bandWidth - 40, bandY + 40, 3 + i * 3, 0, Math.PI * 2)
+      ctx.fill()
+
+      ctx.beginPath()
+      ctx.arc(bandX + bandWidth - 40, bandY + bandHeight - 40, 3 + i * 3, 0, Math.PI * 2)
+      ctx.fill()
+    }
+
+    // Add "VIP ACCESS" watermark
+    ctx.save()
+    ctx.globalAlpha = 0.15
+    ctx.font = "bold 60px 'Inter', sans-serif"
+    ctx.fillStyle = "#000000"
+    ctx.textAlign = "center"
+    ctx.fillText("VIP ACCESS", contentX + contentWidth / 2, bandY + bandHeight / 2 + 20)
+    ctx.restore()
+
+    // Add holographic effect lines
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.1)"
+    ctx.lineWidth = 1
+    for (let i = 0; i < 20; i++) {
+      ctx.beginPath()
+      ctx.moveTo(contentX, bandY + i * 15)
+      ctx.lineTo(contentX + contentWidth, bandY + i * 15 + 30)
+      ctx.stroke()
+    }
+
+    // Add neon glow effect around entire wristband
+    ctx.strokeStyle = "#39FF14"
+    ctx.lineWidth = 3
+    ctx.shadowColor = "#39FF14"
+    ctx.shadowBlur = 30
+    ctx.strokeRect(bandX, bandY, bandWidth, bandHeight)
+    ctx.shadowBlur = 0
+
+    // Show download button
+    downloadBtn.style.display = "block"
   }
-  drawBracelet(name);
-});
 
-downloadBtn.addEventListener("click", () => {
-  const link = document.createElement("a");
-  link.download = "brazalete_gala.png";
-  link.href = braceletCanvas.toDataURL("image/png");
-  link.click();
-});
+  // Generate bracelet on button click
+  generateBtn.addEventListener("click", () => {
+    const name = braceletInput.value.trim()
+    if (name) {
+      drawBracelet(name)
+    } else {
+      alert("Por favor, ingresa tu nombre completo")
+    }
+  })
 
-function drawBracelet(name) {
-  const w = braceletCanvas.width;
-  const h = braceletCanvas.height;
-  const padding = 15;
-  const innerW = w - padding * 2;
-  const innerH = h - padding * 2;
-  const cornerRadius = 80;
+  // Generate bracelet on Enter key
+  braceletInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+      const name = braceletInput.value.trim()
+      if (name) {
+        drawBracelet(name)
+      }
+    }
+  })
 
-  ctx.clearRect(0, 0, w, h);
-
-  // Fondo base
-  ctx.fillStyle = "#0c0c0c";
-  ctx.beginPath();
-  ctx.roundRect(padding, padding, innerW, innerH, cornerRadius);
-  ctx.fill();
-
-  ctx.save();
-  ctx.clip();
-
-  // Secciones
-  const section1Width = 260;
-  const section3Width = 220;
-  const section2StartX = padding + section1Width;
-  const section2Width = innerW - section1Width - section3Width;
-
-  const neon = "#00ff66";
-  const greenGradient = ctx.createLinearGradient(0, 0, 0, h);
-  greenGradient.addColorStop(0, "#00cc44");
-  greenGradient.addColorStop(0.5, neon);
-  greenGradient.addColorStop(1, "#00cc44");
-
-  // Sección 1
-  ctx.fillStyle = greenGradient;
-  ctx.fillRect(padding, padding, section1Width, innerH);
-
-  // Sección 3
-  ctx.fillStyle = greenGradient;
-  ctx.fillRect(w - section3Width - padding, padding, section3Width, innerH);
-
-  // Sección central
-  ctx.fillStyle = "#000";
-  ctx.fillRect(section2StartX, padding, section2Width, innerH);
-
-  // --- IZQUIERDA ---
-  ctx.fillStyle = "#000";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-
-  ctx.font = "bold 22px 'Inter', sans-serif";
-  ctx.fillText("Mano Derecha", padding + section1Width / 2, h / 2 - 90);
-
-  ctx.font = "40px 'Inter', sans-serif";
-  ctx.fillText("✋", padding + section1Width / 2, h / 2 - 45);
-
-  ctx.font = "bold 38px 'Inter', sans-serif";
-  ctx.fillText("GALA", padding + section1Width / 2, h / 2 + 5);
-  ctx.fillText("ICAT", padding + section1Width / 2, h / 2 + 50);
-  ctx.font = "bold 30px 'Inter', sans-serif";
-  ctx.fillText("2025", padding + section1Width / 2, h / 2 + 95);
-  ctx.font = "bold 22px 'Inter', sans-serif";
-  ctx.fillText("Inter", padding + section1Width / 2, h / 2 + 125);
-
-  // --- CENTRO ---
-  ctx.textAlign = "center";
-  ctx.fillStyle = "#aaa";
-  ctx.font = "20px 'Inter', sans-serif";
-  ctx.fillText("Presenta tu:", w / 2, h / 2 - 70);
-
-  ctx.fillStyle = neon;
-  ctx.shadowColor = neon;
-  ctx.shadowBlur = 25;
-  let fontSize = 80;
-  const maxNameWidth = section2Width - 40;
-  let textWidth;
-  do {
-    fontSize--;
-    ctx.font = `bold ${fontSize}px 'Inter', sans-serif`;
-    textWidth = ctx.measureText(name.toUpperCase()).width;
-  } while (textWidth > maxNameWidth && fontSize > 20);
-  ctx.fillText(name.toUpperCase(), w / 2, h / 2 + 10);
-  ctx.shadowBlur = 0;
-
-  ctx.fillStyle = "#fff";
-  ctx.font = "24px 'Inter', sans-serif";
-  ctx.fillText("DISCO PARTY", w / 2, h / 2 + 60);
-
-  ctx.fillStyle = "#aaa";
-  ctx.font = "13px 'Inter', sans-serif";
-  ctx.fillText("Este brazalete es tu pase de acceso.", w / 2, h - 55);
-  ctx.fillText("Preséntalo digitalmente o impreso. Sin brazalete, no hay entrada.", w / 2, h - 35);
-
-  // --- DERECHA ---
-  ctx.fillStyle = "#000";
-  ctx.textAlign = "center";
-  ctx.font = "bold 34px 'Inter', sans-serif";
-  ctx.fillText("ALL ACCESS", w - section3Width / 2 - padding, h / 2 - 60);
-
-  ctx.font = "normal 22px 'Inter', sans-serif";
-  ctx.fillText("15 NOV 2025", w - section3Width / 2 - padding, h / 2 - 20);
-
-  // Código de barras
-  const barcodeX = w - section3Width / 2 - padding - 80;
-  const barcodeY = h / 2 + 30;
-  const barcodeW = 160;
-  const barcodeH = 55;
-  ctx.fillStyle = "#000";
-  ctx.fillRect(barcodeX - 5, barcodeY - 5, barcodeW + 10, barcodeH + 10);
-
-  // Barras blancas
-  ctx.fillStyle = "#fff";
-  let currentX = barcodeX;
-  while (currentX < barcodeX + barcodeW) {
-    const lineWidth = Math.random() * 4 + 1;
-    ctx.fillRect(currentX, barcodeY, lineWidth, barcodeH);
-    currentX += lineWidth + Math.random() * 3 + 2;
-  }
-
-  // Borde luminoso
-  ctx.restore();
-  ctx.strokeStyle = neon;
-  ctx.lineWidth = 4;
-  ctx.shadowColor = neon;
-  ctx.shadowBlur = 30;
-  ctx.beginPath();
-  ctx.roundRect(padding, padding, innerW, innerH, cornerRadius);
-  ctx.stroke();
-  ctx.shadowBlur = 0;
-
-  downloadBtn.style.display = "block";
+  // Download bracelet
+  downloadBtn.addEventListener("click", () => {
+    const link = document.createElement("a")
+    link.download = `brazalete-gala-icat-2025-${braceletInput.value.trim().replace(/\s+/g, "-")}.png`
+    link.href = braceletCanvas.toDataURL("image/png")
+    link.click()
+  })
 }
