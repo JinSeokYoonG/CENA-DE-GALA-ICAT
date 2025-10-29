@@ -166,123 +166,173 @@ setTimeout(() => {
   })
 }, 100)
 
-// --- LÓGICA DEL GENERADOR DE BRAZALETE ---
-const braceletCanvas = document.getElementById("braceletCanvas")
-const braceletInput = document.getElementById("braceletName")
-const generateBtn = document.getElementById("generateBracelet")
-const downloadBtn = document.getElementById("downloadBracelet")
+// --- LÓGICA DEL GENERADOR DE BRAZALETE (VERSIÓN MEJORADA) ---
+const braceletCanvas = document.getElementById("braceletCanvas");
+const braceletInput = document.getElementById("braceletName");
+const generateBtn = document.getElementById("generateBracelet");
+const downloadBtn = document.getElementById("downloadBracelet");
 
 if (braceletCanvas && braceletInput && generateBtn && downloadBtn) {
-  const ctx = braceletCanvas.getContext("2d")
+  const ctx = braceletCanvas.getContext("2d");
+  const neonGreen = "#39FF14";
+  const darkBg = "#000000";
+  const accentWhite = "#FFFFFF";
 
-  // Function to draw the bracelet
-  function drawBracelet(name) {
-    // Clear canvas
-    ctx.clearRect(0, 0, braceletCanvas.width, braceletCanvas.height)
-
-    // Background - Black
-    ctx.fillStyle = "#000000"
-    ctx.fillRect(0, 0, braceletCanvas.width, braceletCanvas.height)
-
-    // Draw bracelet band with neon green glow
-    const bandHeight = 120
-    const bandY = (braceletCanvas.height - bandHeight) / 2
-
-    // Neon green gradient for the band
-    const gradient = ctx.createLinearGradient(0, bandY, 0, bandY + bandHeight)
-    gradient.addColorStop(0, "#2ecc40")
-    gradient.addColorStop(0.5, "#39FF14")
-    gradient.addColorStop(1, "#2ecc40")
-
-    // Draw main band with rounded edges
-    ctx.fillStyle = gradient
-    ctx.shadowColor = "#39FF14"
-    ctx.shadowBlur = 30
-    ctx.beginPath()
-    ctx.roundRect(50, bandY, braceletCanvas.width - 100, bandHeight, 20)
-    ctx.fill()
-
-    // Reset shadow
-    ctx.shadowBlur = 0
-
-    // Draw decorative lines on top and bottom
-    ctx.strokeStyle = "#000000"
-    ctx.lineWidth = 3
-    ctx.beginPath()
-    ctx.moveTo(50, bandY + 15)
-    ctx.lineTo(braceletCanvas.width - 50, bandY + 15)
-    ctx.stroke()
-
-    ctx.beginPath()
-    ctx.moveTo(50, bandY + bandHeight - 15)
-    ctx.lineTo(braceletCanvas.width - 50, bandY + bandHeight - 15)
-    ctx.stroke()
-
-    // Draw event title at top
-    ctx.fillStyle = "#000000"
-    ctx.font = "bold 24px 'Playfair Display', serif"
-    ctx.textAlign = "center"
-    ctx.textBaseline = "middle"
-    ctx.fillText("GALA ICAT 2025", braceletCanvas.width / 2, bandY + 35)
-
-    // Draw name in the center
-    ctx.font = "bold 36px 'Inter', sans-serif"
-    ctx.fillStyle = "#000000"
-    ctx.shadowColor = "rgba(0, 0, 0, 0.3)"
-    ctx.shadowBlur = 5
-    ctx.fillText(name.toUpperCase(), braceletCanvas.width / 2, braceletCanvas.height / 2)
-    ctx.shadowBlur = 0
-
-    // Draw date at bottom
-    ctx.font = "20px 'Inter', sans-serif"
-    ctx.fillStyle = "#000000"
-    ctx.fillText("15 NOV 2025", braceletCanvas.width / 2, bandY + bandHeight - 35)
-
-    // Add decorative stars
-    ctx.fillStyle = "#000000"
-    ctx.font = "20px Arial"
-    ctx.fillText("★", 100, braceletCanvas.height / 2)
-    ctx.fillText("★", braceletCanvas.width - 100, braceletCanvas.height / 2)
-
-    // Add neon glow effect around the entire bracelet
-    ctx.strokeStyle = "#39FF14"
-    ctx.lineWidth = 2
-    ctx.shadowColor = "#39FF14"
-    ctx.shadowBlur = 20
-    ctx.beginPath()
-    ctx.roundRect(50, bandY, braceletCanvas.width - 100, bandHeight, 20)
-    ctx.stroke()
-    ctx.shadowBlur = 0
-
-    // Show download button
-    downloadBtn.style.display = "block"
+  // Función de ayuda para dibujar el código de barras decorativo
+  function drawBarcode(x, y, width, height) {
+    ctx.fillStyle = darkBg;
+    let currentX = x;
+    while (currentX < x + width) {
+      const lineWidth = Math.random() * 4 + 1; // Ancho de línea aleatorio
+      ctx.fillRect(currentX, y, lineWidth, height);
+      currentX += lineWidth + Math.random() * 3 + 2; // Espacio aleatorio
+    }
   }
 
-  // Generate bracelet on button click
-  generateBtn.addEventListener("click", () => {
-    const name = braceletInput.value.trim()
-    if (name) {
-      drawBracelet(name)
-    } else {
-      alert("Por favor, ingresa tu nombre completo")
-    }
-  })
+  // Función principal para dibujar el brazalete
+  function drawBracelet(name) {
+    const w = braceletCanvas.width; // 800
+    const h = braceletCanvas.height; // 300
+    const padding = 10;
+    const innerW = w - padding * 2; // 780
+    const innerH = h - padding * 2; // 280
+    const cornerRadius = 30;
 
-  // Generate bracelet on Enter key
+    // --- 1. Preparar el Lienzo ---
+    // Limpiar canvas
+    ctx.clearRect(0, 0, w, h);
+
+    // Fondo general (se verá como un "borde" negro)
+    ctx.fillStyle = darkBg;
+    ctx.fillRect(0, 0, w, h);
+
+    // Guardar el estado para clipping
+    ctx.save();
+
+    // --- 2. Crear la Forma Base del Brazalete ---
+    // Crear el camino redondeado principal
+    ctx.beginPath();
+    ctx.roundRect(padding, padding, innerW, innerH, cornerRadius);
+    ctx.fillStyle = darkBg;
+    ctx.fill();
+
+    // Establecer esta forma como un "clip"
+    // Todo lo que dibujemos de ahora en adelante solo aparecerá DENTRO de esta forma
+    ctx.clip();
+
+    // --- 3. Dibujar las Secciones (Apartados) ---
+
+    // Sección 1: Izquierda (Verde)
+    const section1Width = 220;
+    ctx.fillStyle = neonGreen;
+    ctx.fillRect(padding, padding, section1Width, innerH);
+
+    // Sección 3: Derecha (Verde)
+    const section3Width = 200;
+    ctx.fillStyle = neonGreen;
+    ctx.fillRect(w - section3Width - padding, padding, section3Width, innerH);
+
+    // La Sección 2 (Centro) ya es negra por el fondo que pusimos en el paso 2
+
+    // --- 4. Añadir Texto y Gráficos ---
+
+    // Texto Sección 1 (Izquierda)
+    ctx.fillStyle = darkBg;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.font = "bold 50px 'Playfair Display', serif";
+    ctx.fillText("GALA", padding + section1Width / 2, h / 2 - 60);
+    ctx.fillText("ICAT", padding + section1Width / 2, h / 2);
+    ctx.font = "bold 30px 'Inter', sans-serif";
+    ctx.fillText("2025", padding + section1Width / 2, h / 2 + 60);
+
+    // Texto Sección 2 (Centro - Nombre)
+    ctx.fillStyle = neonGreen;
+    ctx.shadowColor = neonGreen;
+    ctx.shadowBlur = 15;
+    ctx.textAlign = "center";
+
+    // Lógica para auto-ajustar el tamaño del nombre
+    let fontSize = 52;
+    const maxWidth = w - section1Width - section3Width - padding * 4; // Ancho max del nombre
+    let textWidth;
+    do {
+      fontSize--;
+      ctx.font = `bold ${fontSize}px 'Inter', sans-serif`;
+      textWidth = ctx.measureText(name.toUpperCase()).width;
+    } while (textWidth > maxWidth && fontSize > 18);
+
+    ctx.fillText(name.toUpperCase(), w / 2, h / 2 - 15);
+
+    // Subtítulo
+    ctx.shadowBlur = 0; // Quitar sombra para el subtítulo
+    ctx.fillStyle = accentWhite;
+    ctx.font = "normal 20px 'Inter', sans-serif";
+    ctx.fillText("DISCO PARTY", w / 2, h / 2 + 35);
+
+    // Texto Sección 3 (Derecha)
+    ctx.fillStyle = darkBg;
+    ctx.textAlign = "center";
+    ctx.font = "bold 36px 'Inter', sans-serif";
+    ctx.fillText("ALL ACCESS", w - section3Width / 2 - padding, h / 2 - 60);
+
+    ctx.font = "normal 24px 'Inter', sans-serif";
+    ctx.fillText("15 NOV 2025", w - section3Width / 2 - padding, h / 2);
+
+    // Gráfico de Código de Barras
+    drawBarcode(w - section3Width / 2 - padding - 80, h / 2 + 40, 160, 50);
+
+    // --- 5. Añadir Brillo Exterior ---
+    // Restaurar el canvas (quitar el clip) para dibujar el borde brillante
+    ctx.restore();
+
+    ctx.strokeStyle = neonGreen;
+    ctx.lineWidth = 4;
+    ctx.shadowColor = neonGreen;
+    ctx.shadowBlur = 20;
+    ctx.beginPath();
+    ctx.roundRect(padding, padding, innerW, innerH, cornerRadius);
+    ctx.stroke();
+
+    // Resetear sombra
+    ctx.shadowBlur = 0;
+
+    // Mostrar botón de descarga
+    downloadBtn.style.display = "block";
+  }
+
+  // --- Lógica de Eventos (Sin Cambios) ---
+
+  // Generar brazalete con clic
+  generateBtn.addEventListener("click", () => {
+    const name = braceletInput.value.trim();
+    if (name) {
+      drawBracelet(name);
+    } else {
+      alert("Por favor, ingresa tu nombre completo");
+    }
+  });
+
+  // Generar brazalete con "Enter"
   braceletInput.addEventListener("keypress", (e) => {
     if (e.key === "Enter") {
-      const name = braceletInput.value.trim()
+      e.preventDefault(); // Evitar que el form se envíe si existe
+      const name = braceletInput.value.trim();
       if (name) {
-        drawBracelet(name)
+        drawBracelet(name);
       }
     }
-  })
+  });
 
-  // Download bracelet
+  // Descargar brazalete
   downloadBtn.addEventListener("click", () => {
-    const link = document.createElement("a")
-    link.download = `brazalete-gala-icat-2025-${braceletInput.value.trim().replace(/\s+/g, "-")}.png`
-    link.href = braceletCanvas.toDataURL("image/png")
-    link.click()
-  })
+    const link = document.createElement("a");
+    const nameSlug = braceletInput.value
+      .trim()
+      .replace(/\s+/g, "-")
+      .toLowerCase();
+    link.download = `brazalete-gala-icat-2025-${nameSlug}.png`;
+    link.href = braceletCanvas.toDataURL("image/png");
+    link.click();
+  });
 }
